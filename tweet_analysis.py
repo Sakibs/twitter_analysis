@@ -27,7 +27,7 @@ def store_stats_data(hashtag, hours, stats):
 		out.write(json.dumps(stat)+'\n')
 	out.close()
 
-def get_num_tweets_hr(hashtag):
+def get_tweet_stats(hashtag):
 	filename = 'tweets_'+hashtag+'.txt'
 	filepath = os.path.join('.', 'data', filename)
 	f = open(filepath, 'r')
@@ -47,8 +47,9 @@ def get_num_tweets_hr(hashtag):
 	current_stats = {
 		'hour_start'		: hour_start,			# hour start and end window
 		'hour_end'			: hour_end,				
-		'n_tweets' 			: 1,					# count of number of tweets in hour span
-		'n_retweets' 		: retweet_count,		# total number of retweets ** Verify
+		'n_tweets' 			: 1,					# count of # of tweets in hour span
+		'n_retweets' 		: retweet_count,		# total # of retweets ** Verify
+		'num_follwr'		: user_followers,		# total # of followers of users posting this hashtag
 		'maxn_follwr'		: user_followers,		# max # followers in users ** NOT SURE YET
 		'sum_follwr_post'	: 0, 					# sum of followers posting hashtag ** NOT SURE YET
 		'tod'				: get_TOD(hour_start)
@@ -68,6 +69,7 @@ def get_num_tweets_hr(hashtag):
 			# update current_stats
 			current_stats['n_tweets'] += 1
 			current_stats['n_retweets'] += retweet_count
+			current_stats['num_follwr'] += user_followers
 			current_stats['maxn_follwr'] = max(current_stats['maxn_follwr'], user_followers)
 		else:
 			# setup for next window
@@ -86,6 +88,7 @@ def get_num_tweets_hr(hashtag):
 				'hour_end'			: hour_end,				
 				'n_tweets' 			: 1,					# count of number of tweets in hour span
 				'n_retweets' 		: retweet_count,		# total number of retweets ** Verify
+				'num_follwr'		: user_followers,		# total # of followers of users posting this hashtag
 				'maxn_follwr'		: user_followers,		# max # followers in users ** NOT SURE YET
 				'sum_follwr_post'	: 0, 					# sum of followers posting hashtag ** NOT SURE YET
 				'tod'				: get_TOD(hour_start)
@@ -101,6 +104,8 @@ def get_num_tweets_hr(hashtag):
 
 	f.close()
 	out.close()
+
+	return stats_list
 
 def get_hist(hashtag):
 	filename = 'twts_hr_'+hashtag+'.txt'
@@ -128,5 +133,5 @@ def get_hist(hashtag):
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots'];
 
-	get_num_tweets_hr(hashtags[2])
+	get_tweet_stats(hashtags[2])
 	# get_hist(hashtags[0])
