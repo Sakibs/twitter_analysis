@@ -5,6 +5,7 @@ import datetime, time
 import numpy as np
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
+from sklearn import cross_validation
 
 
 def TStoDT(tstamp):
@@ -118,15 +119,15 @@ def plot_hist(hashtag):
 	plt.ylim(0, 50)
 	plt.show()
 
-def get_regression_model(tweet_stats):
+def get_regression_model(tweet_stats,time_idx):
 
-	y = get_output(tweet_stats, 'n_tweets')
+	y = get_output(tweet_stats, 'n_tweets', time_idx)
 	
-	n_tweets = get_feature_array(tweet_stats,'n_tweets',y)
- 	n_retweets = get_feature_array(tweet_stats,'n_retweets',y)
-	num_follwr = get_feature_array(tweet_stats, 'num_follwr',y)
-	maxn_follwr = get_feature_array(tweet_stats, 'maxn_follwr',y)
-	tod = get_feature_array(tweet_stats, 'tod', y)
+	n_tweets = get_feature_array(tweet_stats,'n_tweets',y,time_idx)
+ 	n_retweets = get_feature_array(tweet_stats,'n_retweets',y,time_idx)
+	num_follwr = get_feature_array(tweet_stats, 'num_follwr',y,time_idx)
+	maxn_follwr = get_feature_array(tweet_stats, 'maxn_follwr',y,time_idx)
+	tod = get_feature_array(tweet_stats, 'tod', y, time_idx)
 
 	x = np.column_stack((n_tweets,n_retweets,num_follwr,maxn_follwr,tod))
 
@@ -137,30 +138,45 @@ def get_regression_model(tweet_stats):
 	model = sm.OLS(y,x)
 	return model
 
-def get_output(tweet_stats,feature):
+def get_output(tweet_stats,feature,time_idx):
 
-	y = np.zeros((len(tweet_stats)-1,1))
-	for point in range(len(tweet_stats)-1):
-		y[point,0] = tweet_stats[point+1][feature]
+	y = np.zeros((len(time_idx)-1,1))
+	max_idx = len(time_idx)-1
+	for point in time_idx[:-1]:
+		if(point-time_idx[0]>=max_idx): #THIS IS AN ERROR. SHOULD BE FIXED
+			break
+		y[point-time_idx[0],0] = tweet_stats[point+1][feature]
 
 	return y
 
-def get_feature_array(tweet_stats,feature,n_tweets_arr):
-	x = np.zeros((n_tweets_arr.shape[0],1))
-	for point in range(n_tweets_arr.shape[0]):
-		x[point,0] = tweet_stats[point][feature]
+def get_feature_array(tweet_stats,feature,n_tweets_arr,time_idx):
+	x = np.zeros((len(time_idx)-1,1))
+	max_idx = len(time_idx)-1
+	for point in time_idx[:-1]:
+		if(point-time_idx[0]>=max_idx): #THIS IS AN ERROR, SHOULD BE FIXED
+			break
+		x[point-time_idx[0],0] = tweet_stats[point][feature]
 
 	return x
+
+def cross_validate(tweet_stats):
+	tot_lenth = len(tweet_stats)
+	kf = cross_validation.KFold(n=tot_lenth,n_folds=10)
+	for train_idx, test_idx in kf:
+		model = get_regression_model(tweet_stats,train_idx)
+		print len(test_idx)
 
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots'];
 
-	#tweet_stats = get_tweet_stats(hashtags[2])
+	tweet_stats = get_tweet_stats(hashtags[2])
+	cross_validate(tweet_stats)
 
-	#model = get_regression_model(tweet_stats)
+	#time_idx =np.arange(0,611)
+	#model = get_regression_model(tweet_stats,time_idx)
 
 	#results = model.fit()
 	#print (results.summary())
 	#plot_hist(hashtags[1])
 
-	plot_hist(hashtags[0])
+	#plot_hist(hashtags[0])
