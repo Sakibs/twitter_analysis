@@ -28,16 +28,6 @@ def store_stats_data(hashtag, hours, stats):
 		out.write(json.dumps(stat)+'\n')
 	out.close()
 
-def update_stat_item(tweet, stat):
-	tweet_time = tweet['firstpost_date']
-	retweet_count = tweet['metrics']['citations']['total']
-	user_followers = tweet['original_author']['followers']
-
-	stat['n_tweets'] += 1
-	stat['n_retweets'] += retweet_count
-	stat['num_follwr'] += user_followers
-	stat['maxn_follwr'] = max(stat['maxn_follwr'], user_followers)
-
 def get_tweet_stats(hashtag):
 	filename = 'tweets_'+hashtag+'.txt'
 	filepath = os.path.join('.', 'data', filename)
@@ -58,21 +48,30 @@ def get_tweet_stats(hashtag):
 	current_stats = {
 		'hour_start'		: hour_start,			# hour start and end window
 		'hour_end'			: hour_end,				
-		'n_tweets' 			: 0,					# count of # of tweets in hour span
-		'n_retweets' 		: 0,					# total # of retweets ** Verify
-		'num_follwr'		: 0,					# total # of followers of users posting this hashtag
-		'maxn_follwr'		: 0,					# max # followers in users ** NOT SURE YET
+		'n_tweets' 			: 1,					# count of # of tweets in hour span
+		'n_retweets' 		: retweet_count,		# total # of retweets ** Verify
+		'num_follwr'		: user_followers,		# total # of followers of users posting this hashtag
+		'maxn_follwr'		: user_followers,		# max # followers in users ** NOT SURE YET
 		'sum_follwr_post'	: 0, 					# sum of followers posting hashtag ** NOT SURE YET
 		'tod'				: get_TOD(hour_start)
 	}
 
 	while 1:
+		line = f.readline()
+		if line == '':
+			break
+
+		tweet = json.loads(line)
 		tweet_time = tweet['firstpost_date']
-		
+		retweet_count = tweet['metrics']['citations']['total']
+		user_followers = tweet['original_author']['followers']
+
 		if tweet_time >= hour_start and tweet_time < hour_end:
 			# update current_stats
-			update_stat_item(tweet, current_stats)
-
+			current_stats['n_tweets'] += 1
+			current_stats['n_retweets'] += retweet_count
+			current_stats['num_follwr'] += user_followers
+			current_stats['maxn_follwr'] = max(current_stats['maxn_follwr'], user_followers)
 		else:
 			# setup for next window
 			# append hour to hours list. This is to keep track of order
@@ -82,36 +81,19 @@ def get_tweet_stats(hashtag):
 			#print '[' + str(hour_start) + ' to ' + str(hour_end) + ')\t' + str(current_stats[hour_start])
 			out.write(str(hour_start) + '\t' + str(hour_end) + '\t' + str(current_stats['n_tweets']) + '\n' )
 			
-			found_window = False
-
-			while not found_window:
-				hour_start = hour_end
-				hour_end = hour_start + 3600
-				# reset current_stats
-				current_stats = {
-					'hour_start'		: hour_start,			# hour start and end window
-					'hour_end'			: hour_end,				
-					'n_tweets' 			: 0,					# count of number of tweets in hour span
-					'n_retweets' 		: 0,					# total number of retweets ** Verify
-					'num_follwr'		: 0,					# total # of followers of users posting this hashtag
-					'maxn_follwr'		: 0,					# max # followers in users ** NOT SURE YET
-					'sum_follwr_post'	: 0, 					# sum of followers posting hashtag ** NOT SURE YET
-					'tod'				: get_TOD(hour_start)
-				}
-
-				if tweet_time >= hour_start and tweet_time < hour_end:
-					found_window = True
-				else:
-					hour_list.append(hour_start)
-					stats_list.append(current_stats)
-					out.write(str(hour_start) + '\t' + str(hour_end) + '\t' + str(current_stats['n_tweets']) + '\n' )
-
-			update_stat_item(tweet, current_stats)
-
-		line = f.readline()
-		if line == '':
-			break
-		tweet = json.loads(line)
+			hour_start = hour_end
+			hour_end = hour_start + 3600
+			# reset current_stats
+			current_stats = {
+				'hour_start'		: hour_start,			# hour start and end window
+				'hour_end'			: hour_end,				
+				'n_tweets' 			: 1,					# count of number of tweets in hour span
+				'n_retweets' 		: retweet_count,		# total number of retweets ** Verify
+				'num_follwr'		: user_followers,		# total # of followers of users posting this hashtag
+				'maxn_follwr'		: user_followers,		# max # followers in users ** NOT SURE YET
+				'sum_follwr_post'	: 0, 					# sum of followers posting hashtag ** NOT SURE YET
+				'tod'				: get_TOD(hour_start)
+			}
 
 	# append the last stats to the list
 	hour_list.append(hour_start)
@@ -126,26 +108,14 @@ def get_tweet_stats(hashtag):
 
 	return stats_list
 
-def get_hist(hashtag):
-	filename = 'twts_hr_'+hashtag+'.txt'
-	filepath = os.path.join('.', 'part1', filename)
-	f = open(filepath, 'r')
+def plot_hist(hashtag):
+	tweet_stats = get_tweet_stats(hashtag)
+	x_arr = np.ones((len(tweet_stats),1))
+	n_tweets = get_feature_array(tweet_stats,'n_tweets',x_arr)
+	print n_tweets
 
-	lines = f.readlines()
-	
-	counts = []
-	hours = []
-
-	for line in lines:
-		line = line[0:-1]
-		items = line.split('\t')
-		counts.append(int(items[2]))
-		hours.append(items[0])
-
-	hist, bins = np.histogram(counts, bins=len(counts))
-	width = 0.7 * (bins[1] - bins[0])
-	center = (bins[:-1] + bins[1:]) / 2
-	plt.bar(center, hist, align='center')
+	plt.hist(n_tweets, bins = 1000)
+	plt.ylim(0, 50)
 	plt.show()
 
 def get_regression_model(tweet_stats):
@@ -162,7 +132,7 @@ def get_regression_model(tweet_stats):
 
 	print y.shape
 	print x.shape
-	x = sm.add_constant(x)
+	#x = sm.add_constant(x)
 
 	model = sm.OLS(y,x)
 	return model
@@ -185,10 +155,12 @@ def get_feature_array(tweet_stats,feature,n_tweets_arr):
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots'];
 
-	tweet_stats = get_tweet_stats(hashtags[2])
+	#tweet_stats = get_tweet_stats(hashtags[2])
 
-	model = get_regression_model(tweet_stats)
+	#model = get_regression_model(tweet_stats)
 
-	results = model.fit()
-	print (results.summary())
-	# get_hist(hashtags[0])
+	#results = model.fit()
+	#print (results.summary())
+	#plot_hist(hashtags[1])
+
+	plot_hist(hashtags[0])
