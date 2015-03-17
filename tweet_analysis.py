@@ -29,6 +29,15 @@ def store_stats_data(hashtag, hours, stats):
 		out.write(json.dumps(stat)+'\n')
 	out.close()
 
+def load_stats_data(hashtag):
+	f = open(os.path.join('.', 'part2', 'stats_'+hashtag+'.txt'), 'r')
+
+	stats_list = []
+	for line in f:
+		stats_list.append(json.loads(line))
+
+	return stats_list
+
 def get_tweet_stats(hashtag):
 	filename = 'tweets_'+hashtag+'.txt'
 	filepath = os.path.join('.', 'data', filename)
@@ -107,8 +116,6 @@ def get_tweet_stats(hashtag):
 	f.close()
 	out.close()
 
-	return stats_list
-
 def plot_hist(hashtag):
 	tweet_stats = get_tweet_stats(hashtag)
 	x_arr = np.ones((len(tweet_stats),1))
@@ -169,7 +176,8 @@ def cross_validate(tweet_stats):
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots'];
 
-	tweet_stats = get_tweet_stats(hashtags[2])
+	#tweet_stats = get_tweet_stats(hashtags[2])
+	tweet_stats = load_stats_data(hashtags[1])
 	cross_validate(tweet_stats)
 
 	#time_idx =np.arange(0,611)
