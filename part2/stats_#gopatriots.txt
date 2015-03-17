@@ -1,4 +1,4 @@
-{"hour_end": 1420839045, "sum_follwr_post": 0, "tod": 12, "n_tweets": 0, "hour_start": 1420835445, "n_retweets": 6, "DT_start": "2015-01-09 12:30:45", "maxn_follwr": 3811.0, "num_follwr": 3811.0}
+{"hour_end": 1420839045, "sum_follwr_post": 0, "tod": 12, "n_tweets": 1, "hour_start": 1420835445, "n_retweets": 6, "DT_start": "2015-01-09 12:30:45", "maxn_follwr": 3811.0, "num_follwr": 3811.0}
 {"hour_end": 1420842645, "sum_follwr_post": 0, "tod": 13, "n_tweets": 1, "hour_start": 1420839045, "n_retweets": 4, "DT_start": "2015-01-09 13:30:45", "maxn_follwr": 1163.0, "num_follwr": 1163.0}
 {"hour_end": 1420846245, "sum_follwr_post": 0, "tod": 14, "n_tweets": 1, "hour_start": 1420842645, "n_retweets": 33, "DT_start": "2015-01-09 14:30:45", "maxn_follwr": 15564.0, "num_follwr": 15564.0}
 {"hour_end": 1420849845, "sum_follwr_post": 0, "tod": 15, "n_tweets": 1, "hour_start": 1420846245, "n_retweets": 3, "DT_start": "2015-01-09 15:30:45", "maxn_follwr": 2124.0, "num_follwr": 2124.0}

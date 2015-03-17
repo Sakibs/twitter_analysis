@@ -4,6 +4,7 @@ import tarfile
 import datetime, time
 import numpy as np
 import matplotlib.pyplot as plt
+import statsmodels.api as sm
 
 
 def TStoDT(tstamp):
@@ -129,9 +130,47 @@ def get_hist(hashtag):
 	plt.bar(center, hist, align='center')
 	plt.show()
 
+def get_regression_model(tweet_stats):
+
+	y = get_output(tweet_stats, 'n_tweets')
+	
+	n_tweets = get_feature_array(tweet_stats,'n_tweets',y)
+ 	n_retweets = get_feature_array(tweet_stats,'n_retweets',y)
+	num_follwr = get_feature_array(tweet_stats, 'num_follwr',y)
+	maxn_follwr = get_feature_array(tweet_stats, 'maxn_follwr',y)
+	tod = get_feature_array(tweet_stats, 'tod', y)
+
+	x = np.column_stack((n_tweets,n_retweets,num_follwr,maxn_follwr,tod))
+
+	print y.shape
+	print x.shape
+	x = sm.add_constant(x)
+
+	model = sm.OLS(y,x)
+	return model
+
+def get_output(tweet_stats,feature):
+
+	y = np.zeros((len(tweet_stats)-1,1))
+	for point in range(len(tweet_stats)-1):
+		y[point,0] = tweet_stats[point+1][feature]
+
+	return y
+
+def get_feature_array(tweet_stats,feature,n_tweets_arr):
+	x = np.zeros((n_tweets_arr.shape[0],1))
+	for point in range(n_tweets_arr.shape[0]):
+		x[point,0] = tweet_stats[point][feature]
+
+	return x
 
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots'];
 
-	get_tweet_stats(hashtags[2])
+	tweet_stats = get_tweet_stats(hashtags[2])
+
+	model = get_regression_model(tweet_stats)
+
+	results = model.fit()
+	print (results.summary())
 	# get_hist(hashtags[0])
