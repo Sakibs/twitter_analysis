@@ -126,22 +126,26 @@ def plot_hist(hashtag):
 	plt.ylim(0, 50)
 	plt.show()
 
+def make_input_matrix(tweet_stats,time_idx):
+	n_tweets = get_feature_array(tweet_stats,'n_tweets',time_idx)
+ 	n_retweets = get_feature_array(tweet_stats,'n_retweets',time_idx)
+	num_follwr = get_feature_array(tweet_stats, 'num_follwr',time_idx)
+	maxn_follwr = get_feature_array(tweet_stats, 'maxn_follwr',time_idx)
+	tod = get_feature_array(tweet_stats, 'tod', time_idx)
+
+	x = np.column_stack((n_tweets,n_retweets,num_follwr,maxn_follwr,tod))
+	return x
+
 def get_regression_model(tweet_stats,time_idx):
 
 	y = get_output(tweet_stats, 'n_tweets', time_idx)
+	x = make_input_matrix(tweet_stats,time_idx)
 	
-	n_tweets = get_feature_array(tweet_stats,'n_tweets',y,time_idx)
- 	n_retweets = get_feature_array(tweet_stats,'n_retweets',y,time_idx)
-	num_follwr = get_feature_array(tweet_stats, 'num_follwr',y,time_idx)
-	maxn_follwr = get_feature_array(tweet_stats, 'maxn_follwr',y,time_idx)
-	tod = get_feature_array(tweet_stats, 'tod', y, time_idx)
+	#print y.shape
+	
+	#x = sm.add_constant(x)  #SHOULD BE ADDING CONSTANT
 
-	x = np.column_stack((n_tweets,n_retweets,num_follwr,maxn_follwr,tod))
-
-	print y.shape
-	print x.shape
-	#x = sm.add_constant(x)
-
+	#print x.shape
 	model = sm.OLS(y,x)
 	return model
 
@@ -156,7 +160,7 @@ def get_output(tweet_stats,feature,time_idx):
 
 	return y
 
-def get_feature_array(tweet_stats,feature,n_tweets_arr,time_idx):
+def get_feature_array(tweet_stats,feature,time_idx):
 	x = np.zeros((len(time_idx)-1,1))
 	max_idx = len(time_idx)-1
 	for point in time_idx[:-1]:
@@ -171,10 +175,17 @@ def cross_validate(tweet_stats):
 	kf = cross_validation.KFold(n=tot_lenth,n_folds=10)
 	for train_idx, test_idx in kf:
 		model = get_regression_model(tweet_stats,train_idx)
-		print len(test_idx)
+
+		x_arr  = make_input_matrix(tweet_stats,test_idx)
+		#x_arr = sm.add_constant(x_arr)   #SHOULD BE ADDING CONSTANT
+		res = model.fit()
+		print x_arr.shape
+		newy =  res.predict(x_arr)
+
+
 
 if __name__ == "__main__":
-	hashtags = ['#superbowl', '#nfl', '#gopatriots'];
+	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
 
 	#tweet_stats = get_tweet_stats(hashtags[2])
 	tweet_stats = load_stats_data(hashtags[1])
