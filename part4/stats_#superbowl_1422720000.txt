@@ -1,0 +1,12 @@
+{"hour_end": 1422723600, "n_retweets": 2228, "DT_start": "2015-01-31 08:00:00", "sum_follwr_post": 0, "maxn_follwr": 6052617.0, "n_tweets": 766, "hour_start": 1422720000, "tod": 8, "num_follwr": 39848055.0}
+{"hour_end": 1422727200, "n_retweets": 1889, "DT_start": "2015-01-31 09:00:00", "sum_follwr_post": 0, "maxn_follwr": 6052617.0, "n_tweets": 835, "hour_start": 1422723600, "tod": 9, "num_follwr": 23369656.0}
+{"hour_end": 1422730800, "n_retweets": 2942, "DT_start": "2015-01-31 10:00:00", "sum_follwr_post": 0, "maxn_follwr": 6052617.0, "n_tweets": 883, "hour_start": 1422727200, "tod": 10, "num_follwr": 41175673.0}
+{"hour_end": 1422734400, "n_retweets": 2368, "DT_start": "2015-01-31 11:00:00", "sum_follwr_post": 0, "maxn_follwr": 6052617.0, "n_tweets": 735, "hour_start": 1422730800, "tod": 11, "num_follwr": 43588287.0}
+{"hour_end": 1422738000, "n_retweets": 3578, "DT_start": "2015-01-31 12:00:00", "sum_follwr_post": 0, "maxn_follwr": 6844959.0, "n_tweets": 1035, "hour_start": 1422734400, "tod": 12, "num_follwr": 41308915.0}
+{"hour_end": 1422741600, "n_retweets": 5333, "DT_start": "2015-01-31 13:00:00", "sum_follwr_post": 0, "maxn_follwr": 15992195.0, "n_tweets": 883, "hour_start": 1422738000, "tod": 13, "num_follwr": 66555083.0}
+{"hour_end": 1422745200, "n_retweets": 2463, "DT_start": "2015-01-31 14:00:00", "sum_follwr_post": 0, "maxn_follwr": 10167262.0, "n_tweets": 972, "hour_start": 1422741600, "tod": 14, "num_follwr": 42529553.0}
+{"hour_end": 1422748800, "n_retweets": 3923, "DT_start": "2015-01-31 15:00:00", "sum_follwr_post": 0, "maxn_follwr": 9206887.0, "n_tweets": 883, "hour_start": 1422745200, "tod": 15, "num_follwr": 46753485.0}
+{"hour_end": 1422752400, "n_retweets": 5131, "DT_start": "2015-01-31 16:00:00", "sum_follwr_post": 0, "maxn_follwr": 10167262.0, "n_tweets": 2302, "hour_start": 1422748800, "tod": 16, "num_follwr": 46637810.0}
+{"hour_end": 1422756000, "n_retweets": 7208, "DT_start": "2015-01-31 17:00:00", "sum_follwr_post": 0, "maxn_follwr": 6052623.0, "n_tweets": 2600, "hour_start": 1422752400, "tod": 17, "num_follwr": 38041304.0}
+{"hour_end": 1422759600, "n_retweets": 4855, "DT_start": "2015-01-31 18:00:00", "sum_follwr_post": 0, "maxn_follwr": 2401258.0, "n_tweets": 2206, "hour_start": 1422756000, "tod": 18, "num_follwr": 29289471.0}
+{"hour_end": 1422763200, "n_retweets": 16457, "DT_start": "2015-01-31 19:00:00", "sum_follwr_post": 0, "maxn_follwr": 25258856.0, "n_tweets": 1030, "hour_start": 1422759600, "tod": 19, "num_follwr": 76752882.0}

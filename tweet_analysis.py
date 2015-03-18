@@ -48,6 +48,29 @@ def load_stats_data(hashtag):
 
 	return stats_list
 
+def split_stats_data(hashtag, times):
+	stats = load_stats_data(hashtag)
+
+	if len(times) <= 0:
+		return
+
+	out = open(os.path.join('.', 'part4', 'stats_'+hashtag+'_start'+'.txt'), 'w')
+
+	i=0
+	t=0
+	while i < len(stats):
+		if(t < len(times) and stats[i]['hour_start'] >= times[t]):
+			# print "11111"
+			out.close()
+			out = open(os.path.join('.', 'part4', 'stats_'+hashtag+'_'+str(times[t])+'.txt'), 'w')
+			t += 1
+		else:
+			# print "22222"
+			out.write(json.dumps(stats[i])+'\n')
+			i += 1
+	out.close()
+			
+
 def update_stat_item(tweet, stat):
 	tweet_time = tweet['firstpost_date']
 	retweet_count = tweet['metrics']['citations']['total']
@@ -221,6 +244,7 @@ def cross_validate(tweet_stats):
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
 
+
 	#tweet_stats = get_tweet_stats(hashtags[1])
 	tweet_stats = load_stats_data(hashtags[1])
 	cross_validate(tweet_stats)
@@ -228,6 +252,7 @@ if __name__ == "__main__":
 	#time_idx =np.arange(0,611)
 	#model = get_regression_model(tweet_stats,time_idx)
 
+	split_stats_data(hashtags[0], [1422720000, 1422763200])
 
 	#results = model.fit()
 	#print (results.summary())
