@@ -182,15 +182,13 @@ def make_input_matrix(tweet_stats,time_idx):
 	maxn_follwr = get_feature_array(tweet_stats, 'maxn_follwr',time_idx)
 	tod = get_feature_array(tweet_stats, 'tod', time_idx)
 
-	x = np.column_stack((n_tweets,n_retweets,num_follwr,maxn_follwr,tod))
+	#x = np.column_stack(( n_tweets, n_retweets, num_follwr, maxn_follwr, tod))
+	x = np.column_stack(( np.ones((len(time_idx)-1,1)), n_tweets, n_retweets, num_follwr, maxn_follwr, tod))
 	return x
 
 def get_regression_model(tweet_stats,time_idx):
-
 	y = get_output(tweet_stats, 'n_tweets', time_idx)
 	x = make_input_matrix(tweet_stats,time_idx)
-	
-	x = sm.add_constant(x)  #SHOULD BE ADDING CONSTANT
 	
 	model = sm.OLS(y,x)
 	return model
@@ -221,11 +219,9 @@ def cross_validate(tweet_stats):
 	kf = cross_validation.KFold(n=tot_lenth,n_folds=10, shuffle = True)
 	rms_error_arr = []
 	for train_idx, test_idx in kf:
-		model = get_regression_model(tweet_stats,train_idx)
-
 		x_arr  = make_input_matrix(tweet_stats,test_idx)
-		x_arr = np.column_stack((x_arr, np.ones((len(test_idx)-1,1)) ))
 		
+		model = get_regression_model(tweet_stats,train_idx)
 		res = model.fit()
 		newy =  res.predict(x_arr)
 		
@@ -240,14 +236,16 @@ def cross_validate(tweet_stats):
 def plot_scatter(tweet_stats,feature,model):
 	time_idx = np.arange(0,len(tweet_stats)-1)
 	x = make_input_matrix(tweet_stats,time_idx)
-	x = sm.add_constant(x)
 	res = model.fit()
 	ypred = res.predict(x)
-	print ypred
-
+	print ypred.shape
 
 	feat_arr = get_feature_array(tweet_stats,feature,time_idx)
+	print feat_arr.shape
 
+	# Plotting predictant vs feature (predictant is x and feature is y)
+	plt.scatter(ypred,feat_arr)
+	plt.show()
 
 
 
@@ -257,7 +255,7 @@ if __name__ == "__main__":
 
 	#tweet_stats = get_tweet_stats(hashtags[1])
 	tweet_stats = load_stats_data(hashtags[1])
-	cross_validate(tweet_stats)
+	#cross_validate(tweet_stats)
 
 	time_idx = np.arange(0,len(tweet_stats)-1)
 	model = get_regression_model(tweet_stats,time_idx)
