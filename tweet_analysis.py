@@ -70,7 +70,6 @@ def split_stats_data(hashtag, times):
 			i += 1
 	out.close()
 			
-
 def update_stat_item(tweet, stat):
 	tweet_time = tweet['firstpost_date']
 	retweet_count = tweet['metrics']['citations']['total']
@@ -191,11 +190,8 @@ def get_regression_model(tweet_stats,time_idx):
 	y = get_output(tweet_stats, 'n_tweets', time_idx)
 	x = make_input_matrix(tweet_stats,time_idx)
 	
-	#print y.shape
+	x = sm.add_constant(x)  #SHOULD BE ADDING CONSTANT
 	
-	#x = sm.add_constant(x)  #SHOULD BE ADDING CONSTANT
-
-	#print x.shape
 	model = sm.OLS(y,x)
 	return model
 
@@ -228,7 +224,8 @@ def cross_validate(tweet_stats):
 		model = get_regression_model(tweet_stats,train_idx)
 
 		x_arr  = make_input_matrix(tweet_stats,test_idx)
-		#x_arr = sm.add_constant(x_arr)   #SHOULD BE ADDING CONSTANT
+		x_arr = np.column_stack((x_arr, np.ones((len(test_idx)-1,1)) ))
+		
 		res = model.fit()
 		newy =  res.predict(x_arr)
 		
@@ -240,6 +237,19 @@ def cross_validate(tweet_stats):
 	avg_error = float(sum(rms_error_arr))/len(rms_error_arr)
 	print ('average error is ' + str(avg_error))
 
+def plot_scatter(tweet_stats,feature,model):
+	time_idx = np.arange(0,len(tweet_stats)-1)
+	x = make_input_matrix(tweet_stats,time_idx)
+	x = sm.add_constant(x)
+	res = model.fit()
+	ypred = res.predict(x)
+	print ypred
+
+
+	feat_arr = get_feature_array(tweet_stats,feature,time_idx)
+
+
+
 
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
@@ -249,13 +259,16 @@ if __name__ == "__main__":
 	tweet_stats = load_stats_data(hashtags[1])
 	cross_validate(tweet_stats)
 
-	#time_idx =np.arange(0,611)
-	#model = get_regression_model(tweet_stats,time_idx)
+	time_idx = np.arange(0,len(tweet_stats)-1)
+	model = get_regression_model(tweet_stats,time_idx)
+	#results = model.fit()
+	#print results.summary()
 
-	split_stats_data(hashtags[0], [1422720000, 1422763200])
+	#split_stats_data(hashtags[0], [1422720000, 1422763200])
 
 	#results = model.fit()
 	#print (results.summary())
 	#plot_hist(hashtags[1])
 
 	#plot_hist(hashtags[0])
+	plot_scatter(tweet_stats,'n_tweets', model)
