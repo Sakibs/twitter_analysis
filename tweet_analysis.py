@@ -212,7 +212,7 @@ def cross_validate(tweet_stats):
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
 
-	tweet_stats = get_tweet_stats(hashtags[2])
+	tweet_stats = get_tweet_stats(hashtags[0])
 	#tweet_stats = load_stats_data(hashtags[1])
 	#cross_validate(tweet_stats)
 
