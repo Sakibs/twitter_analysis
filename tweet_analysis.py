@@ -6,6 +6,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import statsmodels.api as sm
 from sklearn import cross_validation
+from sklearn.metrics import mean_squared_error
+from math import sqrt
 
 
 def TStoDT(tstamp):
@@ -191,7 +193,7 @@ def get_regression_model(tweet_stats,time_idx):
 	
 	#print y.shape
 	
-	#x = sm.add_constant(x)  #SHOULD BE ADDING CONSTANT
+	x = sm.add_constant(x)  #SHOULD BE ADDING CONSTANT
 
 	#print x.shape
 	model = sm.OLS(y,x)
@@ -221,23 +223,29 @@ def get_feature_array(tweet_stats,feature,time_idx):
 def cross_validate(tweet_stats):
 	tot_lenth = len(tweet_stats)
 	kf = cross_validation.KFold(n=tot_lenth,n_folds=10)
+	rms_error_arr = []
 	for train_idx, test_idx in kf:
 		model = get_regression_model(tweet_stats,train_idx)
 
 		x_arr  = make_input_matrix(tweet_stats,test_idx)
-		#x_arr = sm.add_constant(x_arr)   #SHOULD BE ADDING CONSTANT
+		x_arr = sm.add_constant(x_arr)   #SHOULD BE ADDING CONSTANT
 		res = model.fit()
-		print x_arr.shape
 		newy =  res.predict(x_arr)
-
+		actualy = get_feature_array(tweet_stats,'n_tweets',test_idx)
+		rms_error = sqrt(mean_squared_error(actualy,newy))
+		print ('rmse is ' + str(rms_error))
+		rms_error_arr.append(rms_error)
+	avg_error = float(sum(rms_error_arr))/len(rms_error_arr)
+	print ('average error is ' + str(avg_error))
 
 
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
 
-	#tweet_stats = get_tweet_stats(hashtags[0])
-	#tweet_stats = load_stats_data(hashtags[1])
-	#cross_validate(tweet_stats)
+
+	#tweet_stats = get_tweet_stats(hashtags[1])
+	tweet_stats = load_stats_data(hashtags[1])
+	cross_validate(tweet_stats)
 
 	#time_idx =np.arange(0,611)
 	#model = get_regression_model(tweet_stats,time_idx)
