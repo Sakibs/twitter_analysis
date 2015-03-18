@@ -170,7 +170,7 @@ def get_regression_model(tweet_stats,time_idx):
 	
 	#print y.shape
 	
-	x = sm.add_constant(x)  #SHOULD BE ADDING CONSTANT
+	#x = sm.add_constant(x)  #SHOULD BE ADDING CONSTANT
 
 	#print x.shape
 	model = sm.OLS(y,x)
@@ -199,19 +199,21 @@ def get_feature_array(tweet_stats,feature,time_idx):
 
 def cross_validate(tweet_stats):
 	tot_lenth = len(tweet_stats)
-	kf = cross_validation.KFold(n=tot_lenth,n_folds=10)
+	kf = cross_validation.KFold(n=tot_lenth,n_folds=10, shuffle = True)
 	rms_error_arr = []
 	for train_idx, test_idx in kf:
 		model = get_regression_model(tweet_stats,train_idx)
 
 		x_arr  = make_input_matrix(tweet_stats,test_idx)
-		x_arr = sm.add_constant(x_arr)   #SHOULD BE ADDING CONSTANT
+		#x_arr = sm.add_constant(x_arr)   #SHOULD BE ADDING CONSTANT
 		res = model.fit()
 		newy =  res.predict(x_arr)
+		
 		actualy = get_feature_array(tweet_stats,'n_tweets',test_idx)
 		rms_error = sqrt(mean_squared_error(actualy,newy))
 		print ('rmse is ' + str(rms_error))
 		rms_error_arr.append(rms_error)
+	
 	avg_error = float(sum(rms_error_arr))/len(rms_error_arr)
 	print ('average error is ' + str(avg_error))
 
