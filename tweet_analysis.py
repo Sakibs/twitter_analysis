@@ -48,6 +48,15 @@ def load_stats_data(hashtag):
 
 	return stats_list
 
+def load_split_stats_data(hashtag, path_end):
+	f = open(os.path.join('.', 'part4', 'stats_'+hashtag+ '_' + path_end + '.txt'), 'r')
+
+	stats_list = []
+	for line in f:
+		stats_list.append(json.loads(line))
+
+	return stats_list
+
 def split_stats_data(hashtag, times):
 	stats = load_stats_data(hashtag)
 
@@ -252,15 +261,15 @@ def plot_scatter(tweet_stats,feature,model):
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
 
-
-	#tweet_stats = get_tweet_stats(hashtags[1])
-	tweet_stats = load_stats_data(hashtags[1])
+	#get_tweet_stats(hashtags[0])
+	#tweet_stats = load_stats_data(hashtags[0])
+	tweet_stats = load_split_stats_data(hashtags[0], 'start')
 	#cross_validate(tweet_stats)
 
 	time_idx = np.arange(0,len(tweet_stats)-1)
 	model = get_regression_model(tweet_stats,time_idx)
-	#results = model.fit()
-	#print results.summary()
+	results = model.fit()
+	print results.summary()
 
 	#split_stats_data(hashtags[0], [1422720000, 1422763200])
 
@@ -269,4 +278,4 @@ if __name__ == "__main__":
 	#plot_hist(hashtags[1])
 
 	#plot_hist(hashtags[0])
-	plot_scatter(tweet_stats,'n_tweets', model)
+	#plot_scatter(tweet_stats,'n_tweets', model)
