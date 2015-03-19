@@ -90,13 +90,15 @@ def update_stat_item(tweet, stat):
 	stat['num_follwr'] += user_followers
 	stat['maxn_follwr'] = max(stat['maxn_follwr'], user_followers)
 
-def get_tweet_stats(hashtag):
-	#filename = 'tweets_'+hashtag+'.txt'
-	filename = hashtag + '.txt'  #HACK SOLUTION HERE
-	#filepath = os.path.join('.', 'data', filename)
-	filepath = os.path.join('.', 'test_data', filename) #HACK SOLUTION HERE
-	f = open(filepath, 'r')
+def get_tweet_stats(hashtag, tag):
+	if tag == 'p1' or tag == 'p2':
+		filename = 'tweets_'+hashtag+'.txt'
+		filepath = os.path.join('.', 'data', filename)
+	elif tag == 'p4':
+		filename = hashtag + '.txt'  #HACK SOLUTION HERE
+		filepath = os.path.join('.', 'test_data', filename) #HACK SOLUTION HERE
 
+	f = open(filepath, 'r')
 	out = open(os.path.join('.', 'part1', 'twts_hr_'+hashtag+'.txt'), 'w') 
 
 	hour_list = []
@@ -178,7 +180,7 @@ def get_tweet_stats(hashtag):
 	out.close()
 
 def plot_hist(hashtag):
-	tweet_stats = get_tweet_stats(hashtag)
+	load_stats_data(hashtag)
 	x_arr = np.ones((len(tweet_stats),1))
 	n_tweets = get_feature_array(tweet_stats,'n_tweets',x_arr)
 	print n_tweets
@@ -266,7 +268,7 @@ def predict_next_hour(samplenum,periodnum):
 	results = model.fit()
 	#print results.summary()
 
-	get_tweet_stats(samplenum+'_'+periodnum)
+	get_tweet_stats(samplenum+'_'+periodnum, 'p4')
 	tweet_stats = load_stats_data(samplenum+'_'+periodnum)
 	test_idx = np.arange(0,len(tweet_stats)-1)
 	x_arr  = make_input_matrix(tweet_stats,test_idx)
@@ -282,7 +284,7 @@ if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
 
 	#get_tweet_stats(hashtags[0])
-	#tweet_stats = load_stats_data(hashtags[0])
+	#tweet_stats = load_stats_data(hashtags[0], 'p1')
 	#cross_validate(tweet_stats)
 
 	#time_idx = np.arange(0,len(tweet_stats)-1)
