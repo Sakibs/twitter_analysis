@@ -181,12 +181,16 @@ def get_tweet_stats(hashtag, tag):
 
 def plot_hist(hashtag):
 	load_stats_data(hashtag)
-	x_arr = np.ones((len(tweet_stats),1))
-	n_tweets = get_feature_array(tweet_stats,'n_tweets',x_arr)
+	time_idx = np.arange(0,len(tweet_stats)-1)
+	n_tweets = get_feature_array(tweet_stats,'n_tweets',time_idx)
 	print n_tweets
 
 	plt.hist(n_tweets, bins = 1000)
 	plt.ylim(0, 50)
+	plt.show()
+
+	time_idx = np.arange(1,len(tweet_stats))
+	plt.bar(time_idx,n_tweets)
 	plt.show()
 
 def make_input_matrix(tweet_stats,time_idx):
@@ -237,13 +241,13 @@ def cross_validate(tweet_stats):
 		res = model.fit()
 		newy =  res.predict(x_arr)
 		
-		actualy = get_feature_array(tweet_stats,'n_tweets',test_idx)
+		actualy = get_output(tweet_stats,'n_tweets',test_idx)
 		rms_error = sqrt(mean_squared_error(actualy,newy))
 		print ('rmse is ' + str(rms_error))
 		rms_error_arr.append(rms_error)
 	
 	avg_error = float(sum(rms_error_arr))/len(rms_error_arr)
-	print ('average error is ' + str(avg_error))
+	print ('average rms error is ' + str(avg_error))
 
 def plot_scatter(tweet_stats,feature,model):
 	time_idx = np.arange(0,len(tweet_stats)-1)
@@ -301,8 +305,8 @@ if __name__ == "__main__":
 	#print (results.summary())
 	#plot_hist(hashtags[1])
 
-	#plot_hist(hashtags[0])
+	plot_hist(hashtags[0])
 	#plot_scatter(tweet_stats,'n_tweets', model)
 
 	#split_stats_data(hashtags[0], [1422720000, 1422763200])
-	#print predict_next_hour('sample1','period1')
+	#print predict_next_hour('sample2','period2')
