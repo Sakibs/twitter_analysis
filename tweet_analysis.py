@@ -49,6 +49,23 @@ def load_stats_data(hashtag):
 
 	return stats_list
 
+def get_stats_averages(hashtag):
+	stats = load_stats_data(hashtag)
+	tot_twts = 0
+	tot_flwr = 0
+	tot_rtwt = 0
+
+	for item in stats:
+		tot_twts += item['n_tweets']
+		tot_rtwt += item['n_retweets']
+		tot_flwr += item['num_follwr']
+
+	print hashtag
+	print 'Average number of tweets (per hour): ' + str(tot_twts/len(stats))
+	print 'Average number of retweets (per hour): ' + str(tot_rtwt/len(stats))
+	print 'Average number of followers of users posting tweets: '+ str(tot_rtwt/len(stats))
+
+
 def load_split_stats_data(hashtag, periodnum):
 	f = open(os.path.join('.', 'part4', 'stats_'+hashtag+ '_' + periodnum + '.txt'), 'r')
 
@@ -180,14 +197,14 @@ def get_tweet_stats(hashtag, tag):
 	out.close()
 
 def plot_hist(hashtag):
-	load_stats_data(hashtag)
+	tweet_stats = load_stats_data(hashtag)
 	time_idx = np.arange(0,len(tweet_stats)-1)
 	n_tweets = get_feature_array(tweet_stats,'n_tweets',time_idx)
 	print n_tweets
 
-	plt.hist(n_tweets, bins = 1000)
-	plt.ylim(0, 50)
-	plt.show()
+	# plt.hist(n_tweets, bins = 1000)
+	# plt.ylim(0, 50)
+	# plt.show()
 
 	time_idx = np.arange(1,len(tweet_stats))
 	plt.bar(time_idx,n_tweets)
@@ -292,9 +309,11 @@ def predict_next_hour(samplenum,periodnum):
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
 
+	for i in range(0,3):
+		plot_hist(hashtags[i])
 	#get_tweet_stats(hashtags[0], 'p1')
-	tweet_stats = load_stats_data(hashtags[1])
-	cross_validate(tweet_stats)
+	# tweet_stats = load_stats_data(hashtags[1])
+	# cross_validate(tweet_stats)
 
 	#time_idx = np.arange(0,len(tweet_stats)-1)
 	#model = get_regression_model(tweet_stats,time_idx)
@@ -305,7 +324,7 @@ if __name__ == "__main__":
 	#print (results.summary())
 	#plot_hist(hashtags[1])
 
-	plot_hist(hashtags[0])
+	# plot_hist(hashtags[0])
 	#plot_scatter(tweet_stats,'n_tweets', model)
 
 	#split_stats_data(hashtags[0], [1422720000, 1422763200])
