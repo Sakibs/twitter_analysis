@@ -281,8 +281,8 @@ def predict_next_hour(samplenum,periodnum):
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
 
-	#get_tweet_stats('sample1_period1')
-	#tweet_stats = load_stats_data('sample1_period1')
+	#get_tweet_stats(hashtags[0])
+	#tweet_stats = load_stats_data(hashtags[0])
 	#cross_validate(tweet_stats)
 
 	#time_idx = np.arange(0,len(tweet_stats)-1)
