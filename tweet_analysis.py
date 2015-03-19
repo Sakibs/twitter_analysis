@@ -197,7 +197,7 @@ def make_input_matrix(tweet_stats,time_idx):
 	tod = get_feature_array(tweet_stats, 'tod', time_idx)
 
 	#x = np.column_stack(( n_tweets, n_retweets, num_follwr, maxn_follwr, tod))
-	x = np.column_stack(( np.ones((len(time_idx)-1,1)), n_tweets, n_retweets, num_follwr, maxn_follwr, tod))
+	x = np.column_stack(( np.ones((len(time_idx),1)), n_tweets, n_retweets, num_follwr, maxn_follwr, tod))
 	return x
 
 def get_regression_model(tweet_stats,time_idx):
@@ -208,24 +208,22 @@ def get_regression_model(tweet_stats,time_idx):
 	return model
 
 def get_output(tweet_stats,feature,time_idx):
-
-	y = np.zeros((len(time_idx)-1,1))
-	max_idx = len(time_idx)-1
-	for point in time_idx[:-1]:
-		if(point-time_idx[0]>=max_idx): #THIS IS AN ERROR. SHOULD BE FIXED
-			break
-		y[point-time_idx[0],0] = tweet_stats[point+1][feature]
-
+	y = np.zeros((len(time_idx),1))
+	max_idx = len(tweet_stats)-1
+	i = 0
+	for point in time_idx:
+		if(point==max_idx): #THIS IS AN ERROR. SHOULD BE FIXED
+			point = point-1
+		y[i,0] = tweet_stats[point+1][feature]
+		i+=1
 	return y
 
 def get_feature_array(tweet_stats,feature,time_idx):
-	x = np.zeros((len(time_idx)-1,1))
-	max_idx = len(time_idx)-1
-	for point in time_idx[:-1]:
-		if(point-time_idx[0]>=max_idx): #THIS IS AN ERROR, SHOULD BE FIXED
-			break
-		x[point-time_idx[0],0] = tweet_stats[point][feature]
-
+	x = np.zeros((len(time_idx),1))
+	i=0
+	for point in time_idx:
+		x[i,0] = tweet_stats[point][feature]
+		i+=1
 	return x
 
 def cross_validate(tweet_stats):
@@ -274,7 +272,14 @@ def predict_next_hour(samplenum,periodnum):
 	x_arr  = make_input_matrix(tweet_stats,test_idx)
 	print x_arr.shape
 
+	print('idx passed in to process: ') 
+	print test_idx
+	yactual = get_feature_array(tweet_stats,'n_tweets',test_idx)
+	print('actual number of tweets for each hour was: ')
+	print yactual
+
 	ypred = results.predict(x_arr)
+	print('predicted number of tweets for each hour: ')
 	print ypred
 	return ypred[-1]
 
@@ -283,9 +288,9 @@ def predict_next_hour(samplenum,periodnum):
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
 
-	#get_tweet_stats(hashtags[0])
-	#tweet_stats = load_stats_data(hashtags[0], 'p1')
-	#cross_validate(tweet_stats)
+	#get_tweet_stats(hashtags[0], 'p1')
+	tweet_stats = load_stats_data(hashtags[1])
+	cross_validate(tweet_stats)
 
 	#time_idx = np.arange(0,len(tweet_stats)-1)
 	#model = get_regression_model(tweet_stats,time_idx)
@@ -300,4 +305,4 @@ if __name__ == "__main__":
 	#plot_scatter(tweet_stats,'n_tweets', model)
 
 	#split_stats_data(hashtags[0], [1422720000, 1422763200])
-	print predict_next_hour('sample1','period1')
+	#print predict_next_hour('sample1','period1')
