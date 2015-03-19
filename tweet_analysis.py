@@ -41,6 +41,7 @@ def store_stats_data(hashtag, hours, stats):
 
 def load_stats_data(hashtag):
 	f = open(os.path.join('.', 'part2', 'stats_'+hashtag+'.txt'), 'r')
+	#f = open(os.path.join('.', 'part2', hashtag +'.txt'), 'r')
 
 	stats_list = []
 	for line in f:
@@ -48,8 +49,8 @@ def load_stats_data(hashtag):
 
 	return stats_list
 
-def load_split_stats_data(hashtag, path_end):
-	f = open(os.path.join('.', 'part4', 'stats_'+hashtag+ '_' + path_end + '.txt'), 'r')
+def load_split_stats_data(hashtag, periodnum):
+	f = open(os.path.join('.', 'part4', 'stats_'+hashtag+ '_' + periodnum + '.txt'), 'r')
 
 	stats_list = []
 	for line in f:
@@ -63,7 +64,7 @@ def split_stats_data(hashtag, times):
 	if len(times) <= 0:
 		return
 
-	out = open(os.path.join('.', 'part4', 'stats_'+hashtag+'_start'+'.txt'), 'w')
+	out = open(os.path.join('.', 'part4', 'stats_'+hashtag+'_period1'+'.txt'), 'w')
 
 	i=0
 	t=0
@@ -71,7 +72,7 @@ def split_stats_data(hashtag, times):
 		if(t < len(times) and stats[i]['hour_start'] >= times[t]):
 			# print "11111"
 			out.close()
-			out = open(os.path.join('.', 'part4', 'stats_'+hashtag+'_'+str(times[t])+'.txt'), 'w')
+			out = open(os.path.join('.', 'part4', 'stats_'+hashtag+'_'+'period'+str(t+2)+'.txt'), 'w')
 			t += 1
 		else:
 			# print "22222"
@@ -90,8 +91,10 @@ def update_stat_item(tweet, stat):
 	stat['maxn_follwr'] = max(stat['maxn_follwr'], user_followers)
 
 def get_tweet_stats(hashtag):
-	filename = 'tweets_'+hashtag+'.txt'
-	filepath = os.path.join('.', 'data', filename)
+	#filename = 'tweets_'+hashtag+'.txt'
+	filename = hashtag + '.txt'  #HACK SOLUTION HERE
+	#filepath = os.path.join('.', 'data', filename)
+	filepath = os.path.join('.', 'test_data', filename) #HACK SOLUTION HERE
 	f = open(filepath, 'r')
 
 	out = open(os.path.join('.', 'part1', 'twts_hr_'+hashtag+'.txt'), 'w') 
@@ -256,22 +259,36 @@ def plot_scatter(tweet_stats,feature,model):
 	plt.scatter(ypred,feat_arr)
 	plt.show()
 
+def predict_next_hour(samplenum,periodnum):
+	tweet_stats = load_split_stats_data(hashtags[0], periodnum)
+	time_idx = np.arange(0,len(tweet_stats)-1)
+	model = get_regression_model(tweet_stats,time_idx)
+	results = model.fit()
+	#print results.summary()
+
+	get_tweet_stats(samplenum+'_'+periodnum)
+	tweet_stats = load_stats_data(samplenum+'_'+periodnum)
+	test_idx = np.arange(0,len(tweet_stats)-1)
+	x_arr  = make_input_matrix(tweet_stats,test_idx)
+	print x_arr.shape
+
+	ypred = results.predict(x_arr)
+	print ypred
+	return ypred[-1]
+
 
 
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
 
-	#get_tweet_stats(hashtags[0])
-	#tweet_stats = load_stats_data(hashtags[0])
-	tweet_stats = load_split_stats_data(hashtags[0], 'start')
+	#get_tweet_stats('sample1_period1')
+	#tweet_stats = load_stats_data('sample1_period1')
 	#cross_validate(tweet_stats)
 
-	time_idx = np.arange(0,len(tweet_stats)-1)
-	model = get_regression_model(tweet_stats,time_idx)
-	results = model.fit()
-	print results.summary()
-
-	#split_stats_data(hashtags[0], [1422720000, 1422763200])
+	#time_idx = np.arange(0,len(tweet_stats)-1)
+	#model = get_regression_model(tweet_stats,time_idx)
+	#results = model.fit()
+	#print results.summary()
 
 	#results = model.fit()
 	#print (results.summary())
@@ -279,3 +296,6 @@ if __name__ == "__main__":
 
 	#plot_hist(hashtags[0])
 	#plot_scatter(tweet_stats,'n_tweets', model)
+
+	#split_stats_data(hashtags[0], [1422720000, 1422763200])
+	print predict_next_hour('sample1','period1')
