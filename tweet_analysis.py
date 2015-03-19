@@ -65,7 +65,6 @@ def get_stats_averages(hashtag):
 	print 'Average number of retweets (per hour): ' + str(tot_rtwt/len(stats))
 	print 'Average number of followers of users posting tweets: '+ str(tot_rtwt/len(stats))
 
-
 def load_split_stats_data(hashtag, periodnum):
 	f = open(os.path.join('.', 'part4', 'stats_'+hashtag+ '_' + periodnum + '.txt'), 'r')
 
@@ -311,9 +310,11 @@ if __name__ == "__main__":
 
 	for i in range(0,3):
 		plot_hist(hashtags[i])
-	#get_tweet_stats(hashtags[0], 'p1')
-	# tweet_stats = load_stats_data(hashtags[1])
-	# cross_validate(tweet_stats)
+	#get_tweet_stats(hashtags[0], 'p1')	#tweet_stats = load_stats_data(hashtags[1])
+
+	tweet_stats = load_split_stats_data(hashtags[1], 'period3')
+	cross_validate(tweet_stats)
+
 
 	#time_idx = np.arange(0,len(tweet_stats)-1)
 	#model = get_regression_model(tweet_stats,time_idx)
@@ -324,8 +325,10 @@ if __name__ == "__main__":
 	#print (results.summary())
 	#plot_hist(hashtags[1])
 
-	# plot_hist(hashtags[0])
+
+	#plot_hist(hashtags[0])
+
 	#plot_scatter(tweet_stats,'n_tweets', model)
 
-	#split_stats_data(hashtags[0], [1422720000, 1422763200])
+	split_stats_data(hashtags[2], [1422720000, 1422763200])
 	#print predict_next_hour('sample2','period2')
