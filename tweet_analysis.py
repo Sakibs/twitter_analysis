@@ -308,16 +308,17 @@ def predict_next_hour(samplenum,periodnum):
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
 
-	for i in range(0,3):
-		plot_hist(hashtags[i])
+	#for i in range(0,3):
+	#	plot_hist(hashtags[i])
 	#get_tweet_stats(hashtags[0], 'p1')	#tweet_stats = load_stats_data(hashtags[1])
 
-	tweet_stats = load_split_stats_data(hashtags[1], 'period3')
-	cross_validate(tweet_stats)
+	#tweet_stats = load_split_stats_data(hashtags[1], 'period3')
+	#cross_validate(tweet_stats)
 
 
-	#time_idx = np.arange(0,len(tweet_stats)-1)
-	#model = get_regression_model(tweet_stats,time_idx)
+	tweet_stats = load_stats_data(hashtags[1])
+	time_idx = np.arange(0,len(tweet_stats)-1)
+	model = get_regression_model(tweet_stats,time_idx)
 	#results = model.fit()
 	#print results.summary()
 
@@ -328,7 +329,7 @@ if __name__ == "__main__":
 
 	#plot_hist(hashtags[0])
 
-	#plot_scatter(tweet_stats,'n_tweets', model)
+	plot_scatter(tweet_stats,'tod', model)
 
-	split_stats_data(hashtags[2], [1422720000, 1422763200])
+	#split_stats_data(hashtags[2], [1422720000, 1422763200])
 	#print predict_next_hour('sample2','period2')
