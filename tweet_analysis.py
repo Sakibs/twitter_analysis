@@ -97,25 +97,32 @@ def split_stats_data(hashtag, times):
 	out.close()
 			
 def update_stat_item(tweet, stat, custom=False):
-	if not custom:
-		tweet_time = tweet['firstpost_date']
-		retweet_count = tweet['metrics']['citations']['total']
-		user_followers = tweet['original_author']['followers']
+	tweet_time = tweet['firstpost_date']
+	retweet_count = tweet['metrics']['citations']['total']
+	user_followers = tweet['original_author']['followers']
 
-		stat['n_tweets'] += 1
-		stat['n_retweets'] += retweet_count
-		stat['num_follwr'] += user_followers
-		stat['maxn_follwr'] = max(stat['maxn_follwr'], user_followers)
+	stat['n_tweets'] += 1
+	stat['n_retweets'] += retweet_count
+	stat['num_follwr'] += user_followers
+	stat['maxn_follwr'] = max(stat['maxn_follwr'], user_followers)
 
-	# else: 
-	# 	acceleration = retweet_count = tweet['metrics']['acceleration']
-	# 	impressions = retweet_count = tweet['metrics']['impressions']
-	# 	stat[]
+	if custom: 
+		acceleration = tweet['metrics']['acceleration']
+		impressions = tweet['metrics']['impressions']
+		ranking_score = tweet['metrics']['ranking_score']
+		stat['acceleration'] += acceleration
+		stat['impressions'] += impressions
+		stat['ranking_score'] = max(stat['ranking_score'], ranking_score)
 
 def get_tweet_stats(hashtag, tag):
+	custom = False
 	if tag == 'p1' or tag == 'p2':
 		filename = 'tweets_'+hashtag+'.txt'
 		filepath = os.path.join('.', 'data', filename)
+	elif tag == 'p3':
+		filename = 'tweets_'+hashtag+'.txt'
+		filepath = os.path.join('.', 'data', filename)
+		custom = True
 	elif tag == 'p4':
 		filename = hashtag + '.txt'  #HACK SOLUTION HERE
 		filepath = os.path.join('.', 'test_data', filename) #HACK SOLUTION HERE
@@ -140,7 +147,11 @@ def get_tweet_stats(hashtag, tag):
 		'num_follwr'		: 0,		# total # of followers of users posting this hashtag
 		'maxn_follwr'		: 0,		# max # followers in users ** NOT SURE YET
 		'sum_follwr_post'	: 0, 					# sum of followers posting hashtag ** NOT SURE YET
-		'tod'				: get_TOD(hour_start)
+		'tod'				: get_TOD(hour_start),
+		# extra stats for part 3
+		'acceleration'		: 0,					# average acceleration of tweets in hour
+		'impressions'		: 0,					# total number of impressions
+		'ranking_score'		: 0						# keep track of highest ranking score 
 	}
 
 	while 1:
@@ -148,11 +159,13 @@ def get_tweet_stats(hashtag, tag):
 	
 		if tweet_time >= hour_start and tweet_time < hour_end:
 			# update current_stats
-			update_stat_item(tweet, current_stats)
+			update_stat_item(tweet, current_stats, custom)
 		else:
 			# setup for next window
 			# append hour to hours list. This is to keep track of order
 			hour_list.append(hour_start)
+			if current_stats['n_tweets'] > 0:
+				current_stats['ranking_score'] = current_stats['ranking_score']/current_stats['n_tweets']
 			stats_list.append(current_stats)
 
 			#print '[' + str(hour_start) + ' to ' + str(hour_end) + ')\t' + str(current_stats[hour_start])
@@ -172,17 +185,20 @@ def get_tweet_stats(hashtag, tag):
 					'num_follwr'		: 0,		# total # of followers of users posting this hashtag
 					'maxn_follwr'		: 0,		# max # followers in users ** NOT SURE YET
 					'sum_follwr_post'	: 0, 					# sum of followers posting hashtag ** NOT SURE YET
-					'tod'				: get_TOD(hour_start)
+					'tod'				: get_TOD(hour_start),
+					# extra stats for part 3
+					'acceleration'		: 0,					# average acceleration of tweets in hour
+					'impressions'		: 0,					# total number of impressions
+					'ranking_score'		: 0						# keep track of highest ranking score 
 				}
 
 				if tweet_time >= hour_start and tweet_time < hour_end:
 					found_interval = True
 				else:
 					hour_list.append(hour_start)
-					stats_list.append(current_stats)
 					out.write(str(hour_start) + '\t' + str(hour_end) + '\t' + str(current_stats['n_tweets']) + '\n' )
 
-			update_stat_item(tweet, current_stats)
+			update_stat_item(tweet, current_stats, custom)
 
 		line = f.readline()
 		if line == '':
@@ -192,6 +208,8 @@ def get_tweet_stats(hashtag, tag):
 
 	# append the last stats to the list
 	hour_list.append(hour_start)
+	if current_stats['n_tweets'] > 0:
+		current_stats['ranking_score'] = current_stats['ranking_score']/current_stats['n_tweets']
 	stats_list.append(current_stats)
 
 	out.write(str(hour_start) + '\t' + str(hour_end) + '\t' + str(current_stats['n_tweets']) + '\n' )
@@ -201,36 +219,40 @@ def get_tweet_stats(hashtag, tag):
 	f.close()
 	out.close()
 
-def plot_hist(hashtag):
+def plot_hist(hashtag, feature='n_tweets'):
 	tweet_stats = load_stats_data(hashtag)
 	time_idx = np.arange(0,len(tweet_stats)-1)
-	n_tweets = get_feature_array(tweet_stats,'n_tweets',time_idx)
-	print n_tweets
+	results = get_feature_array(tweet_stats, feature,time_idx)
+	# print n_tweets
 
 	# plt.hist(n_tweets, bins = 1000)
 	# plt.ylim(0, 50)
 	# plt.show()
 
 	time_idx = np.arange(1,len(tweet_stats))
-	plt.bar(time_idx,n_tweets)
+	plt.bar(time_idx,results)
 	plt.show()
 
-def make_input_matrix(tweet_stats,time_idx):
-	n_tweets = get_feature_array(tweet_stats,'n_tweets',time_idx)
- 	n_retweets = get_feature_array(tweet_stats,'n_retweets',time_idx)
-	num_follwr = get_feature_array(tweet_stats, 'num_follwr',time_idx)
-	maxn_follwr = get_feature_array(tweet_stats, 'maxn_follwr',time_idx)
-	tod = get_feature_array(tweet_stats, 'tod', time_idx)
+def make_input_matrix(tweet_stats,time_idx, featurelist):
+	x = np.ones((len(time_idx),1))
+
+	for feature in featurelist:
+		arr = get_feature_array(tweet_stats, feature, time_idx)
+		x = np.column_stack((x, arr))
+	# n_tweets = get_feature_array(tweet_stats,'n_tweets',time_idx)
+ 	# n_retweets = get_feature_array(tweet_stats,'n_retweets',time_idx)
+	# num_follwr = get_feature_array(tweet_stats, 'num_follwr',time_idx)
+	# maxn_follwr = get_feature_array(tweet_stats, 'maxn_follwr',time_idx)
+	# tod = get_feature_array(tweet_stats, 'tod', time_idx)
 
 	#x = np.column_stack(( n_tweets, n_retweets, num_follwr, maxn_follwr, tod))
-	x = np.column_stack(( np.ones((len(time_idx),1)), n_tweets, n_retweets, num_follwr, maxn_follwr, tod))
+	# x = np.column_stack(( np.ones((len(time_idx),1)), n_tweets, n_retweets, num_follwr, maxn_follwr, tod))
 	return x
 
-def get_regression_model(tweet_stats,time_idx):
+def get_regression_model(tweet_stats,time_idx, featurelist):
 	y = get_output(tweet_stats, 'n_tweets', time_idx)
-	x = make_input_matrix(tweet_stats,time_idx)
+	x = make_input_matrix(tweet_stats,time_idx, featurelist)
 	
-
 	model = sm.OLS(y,x)
 	return model
 
@@ -253,14 +275,14 @@ def get_feature_array(tweet_stats,feature,time_idx):
 		i+=1
 	return x
 
-def cross_validate(tweet_stats):
+def cross_validate(tweet_stats, featurelist):
 	tot_lenth = len(tweet_stats)
 	kf = cross_validation.KFold(n=tot_lenth,n_folds=10, shuffle = True)
 	rms_error_arr = []
 	for train_idx, test_idx in kf:
-		x_arr  = make_input_matrix(tweet_stats,test_idx)
+		x_arr  = make_input_matrix(tweet_stats,test_idx, featurelist)
 		
-		model = get_regression_model(tweet_stats,train_idx)
+		model = get_regression_model(tweet_stats,train_idx, featurelist)
 		res = model.fit()
 		newy =  res.predict(x_arr)
 		
@@ -286,10 +308,10 @@ def plot_scatter(tweet_stats,feature,model):
 	plt.scatter(ypred,feat_arr)
 	plt.show()
 
-def predict_next_hour(samplenum,periodnum):
+def predict_next_hour(samplenum,periodnum, featurelist):
 	tweet_stats = load_split_stats_data(hashtags[0], periodnum)
 	time_idx = np.arange(0,len(tweet_stats)-1)
-	model = get_regression_model(tweet_stats,time_idx)
+	model = get_regression_model(tweet_stats,time_idx, featurelist)
 	results = model.fit()
 	#print results.summary()
 
@@ -314,21 +336,29 @@ def predict_next_hour(samplenum,periodnum):
 
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
+	featurelist1 = ['n_tweets', 'n_retweets', 'num_follwr', 'maxn_follwr', 'tod']
+	featurelist2 = ['n_tweets', 'n_retweets', 'acceleration', 'impressions', 'tod']
 
-	# get_tweet_stats(hashtags[0], 'p1')
+
+	# get_tweet_stats(hashtags[0], 'p3')
+	# tweet_stats = load_stats_data(hashtags[1])
+
+	# for feature in featurelist2:
+		# plot_hist()
+
+
 	# for i in range(3,6):
 		# get_tweet_stats(hashtags[i], 'p1')
 	# get_tweet_stats(hashtags[0], 'p1')	#tweet_stats = load_stats_data(hashtags[1])
 
-	#tweet_stats = load_split_stats_data(hashtags[1], 'period3')
-	#cross_validate(tweet_stats)
+	tweet_stats = load_split_stats_data(hashtags[1], 'period3')
+	cross_validate(tweet_stats, featurelist2)
 
 
-	# tweet_stats = load_stats_data(hashtags[0])
+	# tweet_stats = load_stats_data(hashtags[1])
 	# time_idx = np.arange(0,len(tweet_stats)-1)
-	# model = get_regression_model(tweet_stats,time_idx)
+	# model = get_regression_model(tweet_stats,time_idx, featurelist2)
 	# results = model.fit()
-	# print hashtags[0]
 	# print results.summary()
 
 	#results = model.fit()
@@ -340,5 +370,5 @@ if __name__ == "__main__":
 
 	# plot_scatter(tweet_stats,'tod', model)
 
-	#split_stats_data(hashtags[2], [1422720000, 1422763200])
-	print predict_next_hour('sample2','period2')
+	split_stats_data(hashtags[1], [1422720000, 1422763200])
+	# print predict_next_hour('sample2','period2')
