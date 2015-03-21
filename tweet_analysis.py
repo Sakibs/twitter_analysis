@@ -96,15 +96,21 @@ def split_stats_data(hashtag, times):
 			i += 1
 	out.close()
 			
-def update_stat_item(tweet, stat):
-	tweet_time = tweet['firstpost_date']
-	retweet_count = tweet['metrics']['citations']['total']
-	user_followers = tweet['original_author']['followers']
+def update_stat_item(tweet, stat, custom=False):
+	if not custom:
+		tweet_time = tweet['firstpost_date']
+		retweet_count = tweet['metrics']['citations']['total']
+		user_followers = tweet['original_author']['followers']
 
-	stat['n_tweets'] += 1
-	stat['n_retweets'] += retweet_count
-	stat['num_follwr'] += user_followers
-	stat['maxn_follwr'] = max(stat['maxn_follwr'], user_followers)
+		stat['n_tweets'] += 1
+		stat['n_retweets'] += retweet_count
+		stat['num_follwr'] += user_followers
+		stat['maxn_follwr'] = max(stat['maxn_follwr'], user_followers)
+
+	# else: 
+	# 	acceleration = retweet_count = tweet['metrics']['acceleration']
+	# 	impressions = retweet_count = tweet['metrics']['impressions']
+	# 	stat[]
 
 def get_tweet_stats(hashtag, tag):
 	if tag == 'p1' or tag == 'p2':
@@ -224,6 +230,7 @@ def get_regression_model(tweet_stats,time_idx):
 	y = get_output(tweet_stats, 'n_tweets', time_idx)
 	x = make_input_matrix(tweet_stats,time_idx)
 	
+
 	model = sm.OLS(y,x)
 	return model
 
@@ -308,19 +315,21 @@ def predict_next_hour(samplenum,periodnum):
 if __name__ == "__main__":
 	hashtags = ['#superbowl', '#nfl', '#gopatriots', '#gohawks', '#patriots', '#sb49'];
 
-	#for i in range(0,3):
-	#	plot_hist(hashtags[i])
-	#get_tweet_stats(hashtags[0], 'p1')	#tweet_stats = load_stats_data(hashtags[1])
+	# get_tweet_stats(hashtags[0], 'p1')
+	# for i in range(3,6):
+		# get_tweet_stats(hashtags[i], 'p1')
+	# get_tweet_stats(hashtags[0], 'p1')	#tweet_stats = load_stats_data(hashtags[1])
 
 	#tweet_stats = load_split_stats_data(hashtags[1], 'period3')
 	#cross_validate(tweet_stats)
 
 
-	tweet_stats = load_stats_data(hashtags[1])
-	time_idx = np.arange(0,len(tweet_stats)-1)
-	model = get_regression_model(tweet_stats,time_idx)
-	#results = model.fit()
-	#print results.summary()
+	# tweet_stats = load_stats_data(hashtags[0])
+	# time_idx = np.arange(0,len(tweet_stats)-1)
+	# model = get_regression_model(tweet_stats,time_idx)
+	# results = model.fit()
+	# print hashtags[0]
+	# print results.summary()
 
 	#results = model.fit()
 	#print (results.summary())
@@ -329,7 +338,7 @@ if __name__ == "__main__":
 
 	#plot_hist(hashtags[0])
 
-	plot_scatter(tweet_stats,'tod', model)
+	# plot_scatter(tweet_stats,'tod', model)
 
 	#split_stats_data(hashtags[2], [1422720000, 1422763200])
-	#print predict_next_hour('sample2','period2')
+	print predict_next_hour('sample2','period2')
