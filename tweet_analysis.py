@@ -149,7 +149,7 @@ def get_tweet_stats(hashtag, tag):
 		'sum_follwr_post'	: 0, 					# sum of followers posting hashtag ** NOT SURE YET
 		'tod'				: get_TOD(hour_start),
 		# extra stats for part 3
-		'acceleration'		: 0,					# average acceleration of tweets in hour
+		'acceleration'		: 0,					# total acceleration of tweets in hour
 		'impressions'		: 0,					# total number of impressions
 		'ranking_score'		: 0						# keep track of highest ranking score 
 	}
@@ -340,26 +340,26 @@ if __name__ == "__main__":
 	featurelist2 = ['n_tweets', 'n_retweets', 'acceleration', 'impressions', 'tod']
 
 
-	# get_tweet_stats(hashtags[0], 'p3')
-	# tweet_stats = load_stats_data(hashtags[1])
+	# get_tweet_stats(hashtags[1], 'p3')
+	# tweet_stats = load_stats_data(hashtags[0])
 
 	# for feature in featurelist2:
-		# plot_hist()
+		# plot_hist(hashtags[0], feature)
 
 
 	# for i in range(3,6):
 		# get_tweet_stats(hashtags[i], 'p1')
 	# get_tweet_stats(hashtags[0], 'p1')	#tweet_stats = load_stats_data(hashtags[1])
 
-	tweet_stats = load_split_stats_data(hashtags[1], 'period3')
-	cross_validate(tweet_stats, featurelist2)
+	# tweet_stats = load_split_stats_data(hashtags[1], 'period3')
+	# cross_validate(tweet_stats, featurelist2)
 
 
-	# tweet_stats = load_stats_data(hashtags[1])
-	# time_idx = np.arange(0,len(tweet_stats)-1)
-	# model = get_regression_model(tweet_stats,time_idx, featurelist2)
-	# results = model.fit()
-	# print results.summary()
+	tweet_stats = load_stats_data(hashtags[1])
+	time_idx = np.arange(0,len(tweet_stats)-1)
+	model = get_regression_model(tweet_stats,time_idx, featurelist1)
+	results = model.fit()
+	print results.summary()
 
 	#results = model.fit()
 	#print (results.summary())
@@ -370,5 +370,5 @@ if __name__ == "__main__":
 
 	# plot_scatter(tweet_stats,'tod', model)
 
-	split_stats_data(hashtags[1], [1422720000, 1422763200])
+	# split_stats_data(hashtags[1], [1422720000, 1422763200])
 	# print predict_next_hour('sample2','period2')
